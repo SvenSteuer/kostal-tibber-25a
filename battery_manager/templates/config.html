@@ -93,6 +93,42 @@
             </div>
         </div>
 
+        <!-- Forecast.Solar API Settings -->
+        <div class="card">
+            <h2>⛅ Forecast.Solar Professional API</h2>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="enable_forecast_solar_api" name="enable_forecast_solar_api"
+                           {% if config.enable_forecast_solar_api %}checked{% endif %}>
+                    Forecast.Solar Professional API aktivieren
+                </label>
+                <small>Für präzise stündliche PV-Prognosen mit Professional Abo</small>
+            </div>
+            <div class="form-group">
+                <label for="forecast_solar_api_key">API Key:</label>
+                <input type="password" id="forecast_solar_api_key" name="forecast_solar_api_key"
+                       value="{{ config.forecast_solar_api_key or '' }}"
+                       placeholder="Ihr Forecast.Solar API Key">
+                <small>Von Ihrem Forecast.Solar Professional Account</small>
+            </div>
+            <div class="form-group">
+                <label for="forecast_solar_latitude">Breitengrad (Latitude):</label>
+                <input type="number" id="forecast_solar_latitude" name="forecast_solar_latitude"
+                       value="{{ config.forecast_solar_latitude or 50.992 }}" step="0.001" min="-90" max="90">
+                <small>Geografische Breite Ihrer Anlage (z.B. 50.992)</small>
+            </div>
+            <div class="form-group">
+                <label for="forecast_solar_longitude">Längengrad (Longitude):</label>
+                <input type="number" id="forecast_solar_longitude" name="forecast_solar_longitude"
+                       value="{{ config.forecast_solar_longitude or 7.467 }}" step="0.001" min="-180" max="180">
+                <small>Geografische Länge Ihrer Anlage (z.B. 7.467)</small>
+            </div>
+            <div class="form-group">
+                <label>PV-Anlagen (Planes):</label>
+                <small>Die Konfiguration der PV-Dachflächen (declination, azimuth, kwp) erfolgt weiterhin in der YAML-Konfiguration unter forecast_solar_planes. Eine GUI-Bearbeitung wird in einer späteren Version hinzugefügt.</small>
+            </div>
+        </div>
+
         <!-- Advanced Settings -->
         <div class="card">
             <h2>🔧 Erweitert</h2>
@@ -132,9 +168,9 @@ function saveConfig(event) {
     const config = {};
     for (let [key, value] of formData.entries()) {
         // Convert to appropriate type
-        if (key.includes('password') || key.includes('sensor') || key.includes('ip') || key === 'log_level') {
+        if (key.includes('password') || key.includes('sensor') || key.includes('ip') || key.includes('api_key') || key === 'log_level') {
             config[key] = value;
-        } else if (key === 'enable_tibber_optimization') {
+        } else if (key === 'enable_tibber_optimization' || key === 'enable_forecast_solar_api') {
             config[key] = true;
         } else if (value.includes('.')) {
             config[key] = parseFloat(value);
@@ -142,10 +178,13 @@ function saveConfig(event) {
             config[key] = parseInt(value);
         }
     }
-    
-    // Handle checkbox if not checked
+
+    // Handle checkboxes if not checked
     if (!formData.has('enable_tibber_optimization')) {
         config.enable_tibber_optimization = false;
+    }
+    if (!formData.has('enable_forecast_solar_api')) {
+        config.enable_forecast_solar_api = false;
     }
     
     showLoading('Speichere Konfiguration...');
