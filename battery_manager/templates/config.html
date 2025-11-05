@@ -234,18 +234,38 @@ function saveConfig(event) {
     }
 
     // Build forecast_solar_planes array from individual plane fields
-    config.forecast_solar_planes = [
-        {
-            declination: parseInt(config.plane1_declination),
-            azimuth: parseInt(config.plane1_azimuth),
-            kwp: parseFloat(config.plane1_kwp)
-        },
-        {
-            declination: parseInt(config.plane2_declination),
-            azimuth: parseInt(config.plane2_azimuth),
-            kwp: parseFloat(config.plane2_kwp)
-        }
-    ];
+    const planes = [];
+
+    // Add plane 1 if values are valid
+    const plane1_dec = parseInt(config.plane1_declination);
+    const plane1_azi = parseInt(config.plane1_azimuth);
+    const plane1_kwp = parseFloat(config.plane1_kwp);
+
+    if (!isNaN(plane1_dec) && !isNaN(plane1_azi) && !isNaN(plane1_kwp) && plane1_kwp > 0) {
+        planes.push({
+            declination: plane1_dec,
+            azimuth: plane1_azi,
+            kwp: plane1_kwp
+        });
+        console.log('Plane 1 added:', planes[0]);
+    }
+
+    // Add plane 2 if values are valid
+    const plane2_dec = parseInt(config.plane2_declination);
+    const plane2_azi = parseInt(config.plane2_azimuth);
+    const plane2_kwp = parseFloat(config.plane2_kwp);
+
+    if (!isNaN(plane2_dec) && !isNaN(plane2_azi) && !isNaN(plane2_kwp) && plane2_kwp > 0) {
+        planes.push({
+            declination: plane2_dec,
+            azimuth: plane2_azi,
+            kwp: plane2_kwp
+        });
+        console.log('Plane 2 added:', planes[planes.length - 1]);
+    }
+
+    config.forecast_solar_planes = planes;
+    console.log('Total planes configured:', planes.length);
 
     // Remove individual plane fields from config
     delete config.plane1_declination;
