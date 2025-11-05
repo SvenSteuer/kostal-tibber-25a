@@ -114,11 +114,49 @@ def load_config():
         'tibber_price_threshold_3h': 8,
         'charge_duration_per_10_percent': 18,
         'input_datetime_planned_charge_end': 'input_datetime.tibber_geplantes_ladeende',
-        'input_datetime_planned_charge_start': 'input_datetime.tibber_geplanter_ladebeginn'
+        'input_datetime_planned_charge_start': 'input_datetime.tibber_geplanter_ladebeginn',
+        # v1.0.4 - Forecast.Solar Planes (individual fields)
+        'plane1_declination': 22,
+        'plane1_azimuth': 45,
+        'plane1_kwp': 8.96,
+        'plane2_declination': 22,
+        'plane2_azimuth': -135,
+        'plane2_kwp': 10.665
     }
 
 # Load configuration
 config = load_config()
+
+# Build forecast_solar_planes array from individual fields (if present)
+# This allows Home Assistant schema validation while maintaining the array structure needed by the API
+if 'forecast_solar_planes' not in config or not config.get('forecast_solar_planes'):
+    planes = []
+
+    # Add plane 1 if configured
+    if (config.get('plane1_declination') is not None and
+        config.get('plane1_azimuth') is not None and
+        config.get('plane1_kwp') is not None and
+        config.get('plane1_kwp', 0) > 0):
+        planes.append({
+            'declination': config.get('plane1_declination'),
+            'azimuth': config.get('plane1_azimuth'),
+            'kwp': config.get('plane1_kwp')
+        })
+
+    # Add plane 2 if configured
+    if (config.get('plane2_declination') is not None and
+        config.get('plane2_azimuth') is not None and
+        config.get('plane2_kwp') is not None and
+        config.get('plane2_kwp', 0) > 0):
+        planes.append({
+            'declination': config.get('plane2_declination'),
+            'azimuth': config.get('plane2_azimuth'),
+            'kwp': config.get('plane2_kwp')
+        })
+
+    if planes:
+        config['forecast_solar_planes'] = planes
+        logger.info(f"Built forecast_solar_planes array from individual fields: {len(planes)} plane(s)")
 
 # Global state
 app_state = {
@@ -623,14 +661,34 @@ def api_config():
     if request.method == 'POST':
         try:
             new_config = request.json
-            
+
+            # If forecast_solar_planes array is provided, convert to individual fields for HA schema
+            if 'forecast_solar_planes' in new_config and isinstance(new_config['forecast_solar_planes'], list):
+                planes = new_config['forecast_solar_planes']
+
+                # Extract plane 1
+                if len(planes) > 0:
+                    new_config['plane1_declination'] = planes[0].get('declination')
+                    new_config['plane1_azimuth'] = planes[0].get('azimuth')
+                    new_config['plane1_kwp'] = planes[0].get('kwp')
+
+                # Extract plane 2
+                if len(planes) > 1:
+                    new_config['plane2_declination'] = planes[1].get('declination')
+                    new_config['plane2_azimuth'] = planes[1].get('azimuth')
+                    new_config['plane2_kwp'] = planes[1].get('kwp')
+
+                # Remove array (HA schema doesn't support it)
+                del new_config['forecast_solar_planes']
+                logger.info(f"Converted forecast_solar_planes array to individual fields: {len(planes)} plane(s)")
+
             # Update configuration
             config.update(new_config)
-            
+
             # Save to file
             with open(CONFIG_PATH, 'w') as f:
                 json.dump(config, f, indent=2)
-            
+
             add_log('INFO', 'Configuration updated and saved')
             return jsonify({
                 'status': 'ok',
