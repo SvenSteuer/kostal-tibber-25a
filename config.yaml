@@ -1,5 +1,5 @@
 name: Kostal Battery Manager
-version: "0.9.2"
+version: "0.9.9"
 slug: kostal_battery_manager
 description: "Intelligente Batteriesteuerung für Kostal Plenticore Plus mit Tibber-Optimierung, Verbrauchslernen, prädiktiver Ganztags-Planung und Grafiken"
 url: "https://github.com/SvenSteuer/kostal-battery-manager"
@@ -179,6 +179,12 @@ schema:
   home_consumption_sensor: str?
   average_daily_consumption: float?
   default_hourly_consumption_fallback: float?
+
+  # v0.9.2 - Forecast.Solar Professional API
+  enable_forecast_solar_api: bool
+  forecast_solar_api_key: str?
+  forecast_solar_latitude: float?
+  forecast_solar_longitude: float?
 
   input_datetime_planned_charge_end: str?
   input_datetime_planned_charge_start: str?
