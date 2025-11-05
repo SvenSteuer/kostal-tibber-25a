@@ -14,6 +14,12 @@
             <div class="nav-brand">
                 <h1>🔋 Kostal Battery Manager</h1>
             </div>
+            <div class="nav-links">
+                <a href="{{ base_path }}/" class="nav-link {% if request.path == '/' %}active{% endif %}">📊 Dashboard</a>
+                <a href="{{ base_path }}/config" class="nav-link {% if request.path == '/config' %}active{% endif %}">⚙️ Konfiguration</a>
+                <a href="{{ base_path }}/consumption_import" class="nav-link {% if request.path == '/consumption_import' %}active{% endif %}">📥 Verbrauchsdaten</a>
+                <a href="{{ base_path }}/logs" class="nav-link {% if request.path == '/logs' %}active{% endif %}">📜 Logs</a>
+            </div>
         </nav>
     </header>
 
@@ -22,7 +28,7 @@
     </main>
 
     <footer>
-        <p>Kostal Battery Manager v0.1.0 | Made with ❤️ for Home Assistant</p>
+        <p>Kostal Battery Manager v1.0.1 | Made with ❤️ for Home Assistant</p>
     </footer>
 
     <!-- Chart.js for graphs -->
